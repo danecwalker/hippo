@@ -1,0 +1,7 @@
+fn main() {
+  const a : i32 = 2
+}
+
+fn add(c : i32) i32 {
+  const b : i32 = c
+}
