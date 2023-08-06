@@ -1,0 +1,4 @@
+digraph "examples/counter.x" {
+	main [label="<main>
+", shape="box"]
+}

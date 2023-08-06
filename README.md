@@ -23,6 +23,7 @@
 ## 📝 Table of Contents
 
 - [About](#about)
+- [Examples](#examples)
 - [Authors](#authors)
 - [Acknowledgments](#acknowledgement)
 
@@ -30,6 +31,34 @@
 
 Hippo is a language designed to be easy to learn and use, but also powerful enough to be used for large scale applications. It is a compiled language that is statically typed. It is designed to be a general purpose language that can be used for a variety of applications.
 
+## Examples <a name = "examples"></a>
+
+⚠️ **Note:** This language is still in development and the syntax is subject to change. ⚠️
+
+#### Functions
+
+```rust
+fn add : x, y i32 -> i32 {
+  return x + y
+}
+
+fn main {
+  var x = add(1, 2)
+}
+```
+
+#### Variables
+
+```rust
+var a i32 = 1
+const b, c i32 = 2, 3
+
+fn main {
+  var x = 1
+  var y = 2
+  var z = x + y
+}
+```
 
 ## ✍️ Authors <a name = "authors"></a>
 
