@@ -1,13 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/danecwalker/hippo/internal/flow"
-	"github.com/danecwalker/hippo/internal/par"
 )
 
 func main() {
@@ -20,12 +16,6 @@ func main() {
 
 	file_name := os.Args[1]
 
-	p := par.NewParser(file_name)
-	f := p.Parse()
+	fmt.Println("Parsing file: ", file_name)
 
-	b, _ := json.MarshalIndent(f, "", " ")
-	fmt.Println(string(b))
-
-	cfg := flow.NewCFG()
-	cfg.GenCFG(f)
 }

@@ -1,7 +1,0 @@
-digraph "examples/add.x" {
-	add [label="<add>
-return x + y", shape="box"]
-	main [label="<main>
-add(1, 4)", shape="box"]
-	main -> add
-}
