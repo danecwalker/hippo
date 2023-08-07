@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/danecwalker/hippo/internal/parse"
 )
 
 func main() {
@@ -18,4 +20,7 @@ func main() {
 
 	fmt.Println("Parsing file: ", file_name)
 
+	par := parse.NewParser(file_name)
+
+	par.ParseProgram()
 }

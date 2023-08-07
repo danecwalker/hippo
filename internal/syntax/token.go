@@ -15,19 +15,30 @@ const (
 
 	// Operators and delimiters
 	TokenAssign // =
+	TokenStar   // *
+	TokenSlash  // /
 	TokenPlus   // +
 	TokenMinus  // -
+	TokenArrow  // ->
+	TokenInfer  // <-
 
 	TokenSemicolon // ;
 	TokenColon     // :
 	TokenComma     // ,
+	TokenDot       // .
+	TokenRange     // ..
 	TokenLParen    // (
 	TokenRParen    // )
+	TokenLBrace    // {
+	TokenRBrace    // }
 
 	// Keywords
-	TokenFunc  // fn
-	TokenVar   // var
-	TokenConst // const
+	TokenFunc   // fn
+	TokenVar    // var
+	TokenConst  // const
+	TokenReturn // ret
+	TokenFor    // for
+	TokenIn     // in
 )
 
 var tokenNames = map[TokenType]string{
@@ -39,18 +50,29 @@ var tokenNames = map[TokenType]string{
 	TokenInt:   "INT",
 
 	TokenAssign: "=",
+	TokenStar:   "*",
+	TokenSlash:  "/",
 	TokenPlus:   "+",
 	TokenMinus:  "-",
+	TokenArrow:  "->",
+	TokenInfer:  "<-",
 
-	TokenSemicolon: "SEMICOLON",
+	TokenSemicolon: ";",
 	TokenColon:     "COLON",
 	TokenComma:     "COMMA",
+	TokenDot:       ".",
+	TokenRange:     "..",
 	TokenLParen:    "(",
 	TokenRParen:    ")",
+	TokenLBrace:    "{",
+	TokenRBrace:    "}",
 
-	TokenFunc:  "fn",
-	TokenVar:   "var",
-	TokenConst: "const",
+	TokenFunc:   "fn",
+	TokenVar:    "var",
+	TokenConst:  "const",
+	TokenReturn: "ret",
+	TokenFor:    "for",
+	TokenIn:     "in",
 }
 
 func (tt TokenType) String() string {
@@ -65,6 +87,9 @@ var keywords = map[string]TokenType{
 	"fn":    TokenFunc,
 	"var":   TokenVar,
 	"const": TokenConst,
+	"ret":   TokenReturn,
+	"for":   TokenFor,
+	"in":    TokenIn,
 }
 
 type Token struct {

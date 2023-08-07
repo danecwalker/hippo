@@ -1,5 +1,0 @@
-digraph "examples/add.x" {
-	add [label="add", shape="box"]
-	main [label="main", shape="box"]
-	main -> add
-}

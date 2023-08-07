@@ -98,11 +98,12 @@ fn var const
 The following character sequences represent [operators](#operators) (including [assignment operators](#assignment-operators)) and punctuation:
 
 ```
-+    &&    ==    !=    (     )
--    ||    <     <=    [     ]
-*    <-    >     >=    {     }
-/    =>    =     ...   ,     :
-%    ++    !           .
++    &&
+-    ||
+*    >=
+/    <=
+%    ==
+!    !=
 ```
 
 ### Literals
