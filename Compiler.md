@@ -1,8 +1,7 @@
 # Bootstrapping TBRN
 
 
-<pre class="mermaid" align="center">
-  <code>
+```mermaid
 flowchart TB
   subgraph s0[Frontend]
     f0[Lexer] --> f1[Parser]
@@ -16,5 +15,4 @@ flowchart TB
   end
 
   s0 --> s1 --> s2
-  </code>
-</pre>
+```
