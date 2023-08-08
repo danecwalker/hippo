@@ -1,6 +1,8 @@
 package syntax
 
-import "bytes"
+import (
+	"bytes"
+)
 
 type BinaryExpr struct {
 	X  Expression
@@ -17,6 +19,10 @@ func NewBinaryExpr(x Expression, op *Token, y Expression) *BinaryExpr {
 }
 
 func (b *BinaryExpr) expressionNode() {}
+func (b *BinaryExpr) Pos() *Position {
+	return b.X.Pos()
+}
+
 func (b *BinaryExpr) PrettyPrint(w *bytes.Buffer, indent int) {
 	addIndent(w, indent)
 	w.WriteString("BinaryExpr:\n")

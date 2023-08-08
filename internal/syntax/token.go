@@ -19,6 +19,8 @@ const (
 	TokenSlash  // /
 	TokenPlus   // +
 	TokenMinus  // -
+	TokenGt     // >
+	TokenLt     // <
 	TokenArrow  // ->
 	TokenInfer  // <-
 
@@ -38,7 +40,8 @@ const (
 	TokenConst  // const
 	TokenReturn // ret
 	TokenFor    // for
-	TokenIn     // in
+	TokenIf     // if
+	TokenElse   // else
 )
 
 var tokenNames = map[TokenType]string{
@@ -54,6 +57,8 @@ var tokenNames = map[TokenType]string{
 	TokenSlash:  "/",
 	TokenPlus:   "+",
 	TokenMinus:  "-",
+	TokenGt:     ">",
+	TokenLt:     "<",
 	TokenArrow:  "->",
 	TokenInfer:  "<-",
 
@@ -72,7 +77,8 @@ var tokenNames = map[TokenType]string{
 	TokenConst:  "const",
 	TokenReturn: "ret",
 	TokenFor:    "for",
-	TokenIn:     "in",
+	TokenIf:     "if",
+	TokenElse:   "else",
 }
 
 func (tt TokenType) String() string {
@@ -89,7 +95,8 @@ var keywords = map[string]TokenType{
 	"const": TokenConst,
 	"ret":   TokenReturn,
 	"for":   TokenFor,
-	"in":    TokenIn,
+	"if":    TokenIf,
+	"else":  TokenElse,
 }
 
 type Token struct {

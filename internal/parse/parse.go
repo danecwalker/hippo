@@ -42,6 +42,8 @@ type Parser struct {
 	infixParseFns  map[syntax.TokenType]infixParseFn
 
 	stmtParseFns map[syntax.TokenType]stmtParseFn
+
+	scope *Scope
 }
 
 func (p *Parser) registerPrefix(token_type syntax.TokenType, fn prefixParseFn) {
@@ -59,7 +61,8 @@ func (p *Parser) registerStmt(token_type syntax.TokenType, fn stmtParseFn) {
 func NewParser(filename string) *Parser {
 	lex := lexer.NewLexer(filename)
 	p := &Parser{
-		lex: lex,
+		lex:   lex,
+		scope: NewScope(nil),
 	}
 
 	p.prefixParseFns = make(map[syntax.TokenType]prefixParseFn)
@@ -71,8 +74,11 @@ func NewParser(filename string) *Parser {
 	p.registerInfix(syntax.TokenMinus, p.parseInfixExpression)
 	p.registerInfix(syntax.TokenStar, p.parseInfixExpression)
 	p.registerInfix(syntax.TokenSlash, p.parseInfixExpression)
+	p.registerInfix(syntax.TokenGt, p.parseInfixExpression)
+	p.registerInfix(syntax.TokenLt, p.parseInfixExpression)
 	p.registerInfix(syntax.TokenLParen, p.parseCallExpression)
 	p.registerInfix(syntax.TokenRange, p.parseRangeExpression)
+	p.registerInfix(syntax.TokenAssign, p.parseAssignExpression)
 
 	p.stmtParseFns = make(map[syntax.TokenType]stmtParseFn)
 	p.registerStmt(syntax.TokenVar, p.parseVarStatement)
@@ -81,6 +87,7 @@ func NewParser(filename string) *Parser {
 	p.registerStmt(syntax.TokenReturn, p.parseReturnStatement)
 	p.registerStmt(syntax.TokenFor, p.parseForStatement)
 	p.registerStmt(syntax.TokenIdent, p.parseExpressionStatement)
+	p.registerStmt(syntax.TokenIf, p.parseIfStatement)
 
 	p.precedences = make(map[syntax.TokenType]Prec)
 	p.precedences[syntax.TokenAssign] = EQUALS
@@ -88,6 +95,8 @@ func NewParser(filename string) *Parser {
 	p.precedences[syntax.TokenMinus] = SUM
 	p.precedences[syntax.TokenSlash] = PRODUCT
 	p.precedences[syntax.TokenStar] = PRODUCT
+	p.precedences[syntax.TokenLt] = LESSGREATER
+	p.precedences[syntax.TokenGt] = LESSGREATER
 	p.precedences[syntax.TokenLParen] = CALL
 	p.precedences[syntax.TokenRange] = INDEX
 
@@ -131,6 +140,18 @@ func (p *Parser) acceptPeek(token_type syntax.TokenType) bool {
 	} else {
 		return false
 	}
+}
+
+func (p *Parser) DiscardScope() {
+	if p.scope.Parent == nil {
+		p.errors = append(p.errors, NewError(nil, "cannot discard global scope"))
+		return
+	}
+	p.scope = p.scope.Parent
+}
+
+func (p *Parser) NewScope() {
+	p.scope = NewScope(p.scope)
 }
 
 func (p *Parser) parseStatement() syntax.Statement {
@@ -192,9 +213,6 @@ func (p *Parser) ParseProgram() *syntax.Program {
 		p.nextToken()
 	}
 
-	program.
-		PrettyPrint()
-
 	if len(p.errors) > 0 {
 		for _, err := range p.errors {
 			fmt.Fprintln(os.Stderr, err)
@@ -226,12 +244,62 @@ func (p *Parser) parseVarStatement() syntax.Statement {
 		values = p.parseExpressionList()
 	}
 
-	return syntax.NewNVarStatement(position, kind, names, type_, values)
+	vs := syntax.NewVarStatement(position, names, type_, values)
+
+	for _, name := range vs.Names {
+		if p.scope.Lookup(name.Name) != nil {
+			p.errors = append(p.errors, NewRedeclaredError(name.Pos(), name.Name))
+		} else {
+			k := syntax.ObjKindVar
+			if kind == "const" {
+				k = syntax.ObjKindConst
+			}
+			obj := syntax.NewObject(k, name.Name, vs)
+			name.Obj = obj
+			p.scope.Insert(obj)
+		}
+	}
+	return vs
+}
+
+func (p *Parser) parseAssignExpression(left syntax.Expression) syntax.Expression {
+	op := p.cur_token
+	p.nextToken()
+
+	right := p.parseExpression(LOWEST)
+
+	return syntax.NewAssignmentExpr(left, op, right)
+}
+
+func (p *Parser) parseIfStatement() syntax.Statement {
+	position := p.cur_token.Position
+	p.nextToken()
+
+	condition := p.parseExpression(LOWEST)
+	if !p.expectPeek(syntax.TokenLBrace) {
+		return nil
+	}
+
+	consequence := p.parseBlockStatement()
+
+	var alternative syntax.Statement
+	if p.acceptPeek(syntax.TokenElse) {
+		if p.acceptPeek(syntax.TokenIf) {
+			alternative = p.parseIfStatement()
+		} else {
+			if !p.expectPeek(syntax.TokenLBrace) {
+				return nil
+			}
+			alternative = p.parseBlockStatement()
+		}
+	}
+
+	return syntax.NewIfStmt(position, condition, consequence, alternative)
 }
 
 func (p *Parser) parseFunctionStatement() syntax.Statement {
 	position := p.cur_token.Position
-
+	p.NewScope()
 	if !p.expectPeek(syntax.TokenIdent) {
 		return nil
 	}
@@ -254,13 +322,40 @@ func (p *Parser) parseFunctionStatement() syntax.Statement {
 		return_type = p.parseIdentifierList()
 	}
 
+	fnType := syntax.NewFuncType(params_, return_type)
+
+	for _, param := range params_ {
+		for _, name := range param.Names {
+			if p.scope.Lookup(name.Name) != nil {
+				p.errors = append(p.errors, NewRedeclaredError(name.Pos(), name.Name))
+			} else {
+				k := syntax.ObjKindVar
+				s := syntax.NewVarStatement(name.Pos(), []*syntax.Identifier{name}, param.Type, nil)
+				obj := syntax.NewObject(k, name.Name, s)
+				name.Obj = obj
+				p.scope.Insert(obj)
+			}
+		}
+	}
+
 	if !p.expectPeek(syntax.TokenLBrace) {
 		return nil
 	}
 
 	body := p.parseBlockStatement()
 
-	return syntax.NewFuncStmt(position, name, syntax.NewFuncType(params_, return_type), body)
+	p.DiscardScope()
+
+	fn := syntax.NewFuncStmt(position, name, fnType, body)
+	if p.scope.Lookup(name.Name) != nil {
+		p.errors = append(p.errors, NewRedeclaredError(name.Pos(), name.Name))
+	} else {
+		k := syntax.ObjKindFunc
+		obj := syntax.NewObject(k, name.Name, fn)
+		name.Obj = obj
+		p.scope.Insert(obj)
+	}
+	return fn
 }
 
 func (p *Parser) parseNFields() []*syntax.NField {
@@ -376,6 +471,7 @@ func (p *Parser) parseForStatement() syntax.Statement {
 
 func (p *Parser) parseForRangeStatement(position *syntax.Position) syntax.Statement {
 	p.nextToken()
+	p.NewScope()
 	expr_ := p.parseExpression(LOWEST)
 	name, ok := expr_.(*syntax.Identifier)
 	if !ok {
@@ -390,6 +486,20 @@ func (p *Parser) parseForRangeStatement(position *syntax.Position) syntax.Statem
 
 	expr := p.parseExpression(LOWEST)
 
+	switch expr := expr.(type) {
+	case *syntax.RangeExpr:
+		obj := syntax.NewObject(syntax.ObjKindVar, name.Name, syntax.NewVarStatement(
+			name.Pos(),
+			[]*syntax.Identifier{name},
+			syntax.NewIdentifier(position, "i32"),
+			[]syntax.Expression{syntax.NewBasicLit(position, "i32", expr.Low.(*syntax.BasicLit).Value)},
+		))
+		name.Obj = obj
+		p.scope.Insert(obj)
+	default:
+		p.errors = append(p.errors, NewInvalidRangeError(expr.Pos()))
+	}
+
 	if !p.expectPeek(syntax.TokenLBrace) {
 		return nil
 	}
@@ -399,6 +509,8 @@ func (p *Parser) parseForRangeStatement(position *syntax.Position) syntax.Statem
 	if !p.expectPeek(syntax.TokenRBrace) {
 		return nil
 	}
+
+	p.DiscardScope()
 
 	return syntax.NewForRangeStmt(position, name, expr, body)
 }
@@ -450,7 +562,11 @@ func (p *Parser) parseForLoopStatement(position *syntax.Position) syntax.Stateme
 }
 
 func (p *Parser) parseIdentifier() syntax.Expression {
-	return syntax.NewIdentifier(p.cur_token.Position, p.cur_token.Literal)
+	ident := syntax.NewIdentifier(p.cur_token.Position, p.cur_token.Literal)
+
+	ident.Obj = p.scope.Lookup(ident.Name)
+
+	return ident
 }
 
 func (p *Parser) parseIntegerLiteral() syntax.Expression {
@@ -494,5 +610,6 @@ func (p *Parser) parseExpressionStatement() syntax.Statement {
 func (p *Parser) parseRangeExpression(expr syntax.Expression) syntax.Expression {
 	p.nextToken()
 	right := p.parseExpression(LOWEST)
-	return syntax.NewRangeExpr(expr, right)
+	// TODO: actually check the type
+	return syntax.NewRangeExpr(expr, right, "i32")
 }

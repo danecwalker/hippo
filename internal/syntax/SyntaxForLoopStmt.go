@@ -14,6 +14,10 @@ func NewForLoopStmt(init Statement, cond Expression, post Statement, body *Block
 }
 
 func (f *ForLoopStmt) statementNode() {}
+func (f *ForLoopStmt) Pos() *Position {
+	return f.Init.Pos()
+}
+
 func (fs *ForLoopStmt) PrettyPrint(w *bytes.Buffer, indent int) {
 	addIndent(w, indent)
 	w.WriteString("ForLoopStmt:\n")

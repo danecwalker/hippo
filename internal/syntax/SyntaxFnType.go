@@ -15,6 +15,10 @@ func NewFuncType(params []*NField, results []*Identifier) *FuncType {
 }
 
 func (ft *FuncType) expressionNode() {}
+func (ft *FuncType) Pos() *Position {
+	return nil
+}
+
 func (ft *FuncType) PrettyPrint(w *bytes.Buffer, indent int) {
 	addIndent(w, indent)
 	w.WriteString("FuncType:\n")

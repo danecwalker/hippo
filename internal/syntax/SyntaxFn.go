@@ -22,6 +22,10 @@ func NewFuncStmt(funcPos *Position, name *Identifier, type_ *FuncType, body *Blo
 }
 
 func (fs *FuncStmt) statementNode() {}
+func (fs *FuncStmt) Pos() *Position {
+	return fs.FuncPos
+}
+
 func (fs *FuncStmt) PrettyPrint(w *bytes.Buffer, indent int) {
 	addIndent(w, indent)
 	w.WriteString(fmt.Sprintf("FuncStmt (%s):\n", fs.FuncPos))

@@ -35,3 +35,13 @@ func NewUnexpectedTokenError(pos *syntax.Position, expected *syntax.Token) *Erro
 	msg := "unexpected token %s"
 	return NewError(pos, fmt.Sprintf(msg, expected))
 }
+
+func NewRedeclaredError(pos *syntax.Position, name string) *Error {
+	msg := "redeclared %s"
+	return NewError(pos, fmt.Sprintf(msg, name))
+}
+
+func NewInvalidRangeError(pos *syntax.Position) *Error {
+	msg := "invalid range"
+	return NewError(pos, fmt.Sprintf(msg))
+}

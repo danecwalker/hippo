@@ -123,8 +123,12 @@ func (l *Lexer) NextToken() *syntax.Token {
 			return syntax.NewToken(syntax.TokenInfer, "<-", p)
 		} else {
 			l.Next()
-			return syntax.NewToken(syntax.TokenIllegal, string(b), l.Pos())
+			return syntax.NewToken(syntax.TokenLt, "<", l.Pos())
 		}
+	case '>':
+		p := l.Pos()
+		l.Next()
+		return syntax.NewToken(syntax.TokenGt, ">", p)
 	case ',':
 		p := l.Pos()
 		l.Next()

@@ -15,6 +15,10 @@ func NewWhileStmt(cond Expression, body *BlockStmt) *WhileStmt {
 }
 
 func (ws *WhileStmt) statementNode() {}
+func (ws *WhileStmt) Pos() *Position {
+	return ws.Cond.Pos()
+}
+
 func (ws *WhileStmt) PrettyPrint(w *bytes.Buffer, indent int) {
 	addIndent(w, indent)
 	w.WriteString("WhileStmt:\n")

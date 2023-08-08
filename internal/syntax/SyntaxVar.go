@@ -7,29 +7,33 @@ import (
 
 type VarStatement struct {
 	Position *Position
-	Name     *Identifier
+	Names    []*Identifier
 	Type     *Identifier
-	Value    Expression
-	Kind     string
+	Values   []Expression
 }
 
-func NewVarStatement(position *Position, kind string, name *Identifier, type_ *Identifier, value Expression) *VarStatement {
+func NewVarStatement(position *Position, names []*Identifier, type_ *Identifier, values []Expression) *VarStatement {
 	return &VarStatement{
 		Position: position,
-		Name:     name,
+		Names:    names,
 		Type:     type_,
-		Value:    value,
-		Kind:     kind,
+		Values:   values,
 	}
 }
 
 func (vs *VarStatement) statementNode() {}
+func (vs *VarStatement) Pos() *Position {
+	return vs.Position
+}
+
 func (vs *VarStatement) PrettyPrint(w *bytes.Buffer, indent int) {
 	addIndent(w, indent)
 	w.WriteString(fmt.Sprintf("VarStatement (%s):\n", vs.Position))
 	addIndent(w, indent+1)
 	w.WriteString("Names:\n")
-	vs.Name.PrettyPrint(w, indent+2)
+	for _, name := range vs.Names {
+		name.PrettyPrint(w, indent+2)
+	}
 	addIndent(w, indent+1)
 	w.WriteString("Type:\n")
 	if vs.Type != nil {
@@ -40,17 +44,9 @@ func (vs *VarStatement) PrettyPrint(w *bytes.Buffer, indent int) {
 	}
 
 	addIndent(w, indent+1)
-	w.WriteString("Value:")
-	if vs.Value != nil {
-		w.WriteString("\n")
-		vs.Value.PrettyPrint(w, indent+2)
-	} else {
-		addIndent(w, indent+2)
-		w.WriteString(" nil\n")
+	w.WriteString("Values:\n")
+	for _, value := range vs.Values {
+		value.PrettyPrint(w, indent+2)
 	}
-	addIndent(w, indent+1)
-	w.WriteString("Kind: ")
-	w.WriteString(vs.Kind)
 	w.WriteString("\n")
-
 }

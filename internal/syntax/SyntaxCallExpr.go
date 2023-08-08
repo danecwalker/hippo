@@ -19,6 +19,10 @@ func NewCallExpr(func_ *Identifier, lparen *Position, args Expression, rparen *P
 }
 
 func (c *CallExpr) expressionNode() {}
+func (c *CallExpr) Pos() *Position {
+	return c.Func.Pos()
+}
+
 func (c *CallExpr) PrettyPrint(w *bytes.Buffer, indent int) {
 	addIndent(w, indent)
 	w.WriteString("CallExpr:\n")

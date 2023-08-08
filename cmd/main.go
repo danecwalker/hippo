@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/danecwalker/hippo/internal/intermediate"
 	"github.com/danecwalker/hippo/internal/parse"
 )
 
@@ -22,5 +23,10 @@ func main() {
 
 	par := parse.NewParser(file_name)
 
-	par.ParseProgram()
+	prog := par.ParseProgram()
+	_ = prog
+	prog.PrettyPrint()
+
+	ir := intermediate.NewIR()
+	ir.Generate(prog)
 }

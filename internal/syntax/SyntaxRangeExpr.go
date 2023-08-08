@@ -5,16 +5,21 @@ import "bytes"
 type RangeExpr struct {
 	Low  Expression
 	High Expression
+	Kind string
 }
 
-func NewRangeExpr(low Expression, high Expression) *RangeExpr {
+func NewRangeExpr(low Expression, high Expression, type_ string) *RangeExpr {
 	return &RangeExpr{
 		Low:  low,
 		High: high,
+		Kind: type_,
 	}
 }
 
 func (re *RangeExpr) expressionNode() {}
+func (re *RangeExpr) Pos() *Position {
+	return re.Low.Pos()
+}
 
 func (re *RangeExpr) PrettyPrint(w *bytes.Buffer, indent int) {
 	addIndent(w, indent)

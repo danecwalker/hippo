@@ -20,6 +20,9 @@ func NewBasicLit(position *Position, kind string, value string) *BasicLit {
 }
 
 func (bl *BasicLit) expressionNode() {}
+func (bl *BasicLit) Pos() *Position {
+	return bl.ValuePos
+}
 func (bl *BasicLit) PrettyPrint(w *bytes.Buffer, indent int) {
 	addIndent(w, indent)
 	w.WriteString(fmt.Sprintf("BasicLit: (%s)\n", bl.ValuePos))

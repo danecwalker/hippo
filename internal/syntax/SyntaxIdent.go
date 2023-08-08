@@ -8,6 +8,7 @@ import (
 type Identifier struct {
 	NamePos *Position
 	Name    string
+	Obj     *Object
 }
 
 func NewIdentifier(namePos *Position, name string) *Identifier {
@@ -18,6 +19,10 @@ func NewIdentifier(namePos *Position, name string) *Identifier {
 }
 
 func (i *Identifier) expressionNode() {}
+func (i *Identifier) Pos() *Position {
+	return i.NamePos
+}
+
 func (i *Identifier) PrettyPrint(w *bytes.Buffer, indent int) {
 	addIndent(w, indent)
 	w.WriteString(fmt.Sprintf("Identifier: (%s)\n", i.NamePos))
@@ -25,4 +30,7 @@ func (i *Identifier) PrettyPrint(w *bytes.Buffer, indent int) {
 	w.WriteString("Name: ")
 	w.WriteString(i.Name)
 	w.WriteString("\n")
+	addIndent(w, indent+1)
+	w.WriteString("Obj: ")
+	w.WriteString(fmt.Sprintf("%v\n", i.Obj))
 }
